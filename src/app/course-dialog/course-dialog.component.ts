@@ -3,9 +3,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import {Course} from "../model/course";
 import {FormBuilder, Validators, FormGroup} from "@angular/forms";
 import * as moment from 'moment';
-import {catchError} from 'rxjs/operators';
+import {catchError, finalize} from 'rxjs/operators';
 import {throwError} from 'rxjs';
 import { CoursesService } from 'app/services/courses.service';
+import { LoadingService } from 'app/loading/loading.service';
 
 @Component({
     selector: 'course-dialog',
@@ -22,7 +23,8 @@ export class CourseDialogComponent implements AfterViewInit {
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<CourseDialogComponent>,
         @Inject(MAT_DIALOG_DATA) course:Course,
-        private courseService:CoursesService) {
+        private courseService:CoursesService,
+        private loadingService: LoadingService) {
 
         this.course = course;
 
@@ -40,10 +42,14 @@ export class CourseDialogComponent implements AfterViewInit {
     }
 
     save() {
+        this.loadingService.loadingOn();
         const changes = this.form.value;
         this.courseService.saveCourse(this.course.id,changes)
             .subscribe((val)=> {
                 this.dialogRef.close(val);
+                this.loadingService.loadingOff();
+            },finalize => {
+                this.loadingService.loadingOff();
             });
     }
 
