@@ -32,6 +32,7 @@ export class HomeComponent implements OnInit {
   constructor(private coursesStore: CoursesStore) {}
 
   ngOnInit() {
+    console.log('ohhh')
     this.reloadCourses();
   }
 

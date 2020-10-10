@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, throwError } from "rxjs";
-import { catchError, map, tap } from "rxjs/operators";
+import { catchError, map, shareReplay, tap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
 import { Course, sortCoursesBySeqNo } from "../model/course";
@@ -22,16 +22,6 @@ export class CoursesStore{
             this.loadAllCourses();
   }
 
-  filterByCategory(category: string) : Observable<Course[]>{
-    return this.courses$
-            .pipe(
-              map(courses => 
-                  courses.filter(course => course.category == category)
-                          .sort(sortCoursesBySeqNo)
-                  )
-            )
-  }
-
   private loadAllCourses() {
     const loadCourses$ = this.http.get<Course[]>('/api/courses')
     .pipe(
@@ -46,6 +36,41 @@ export class CoursesStore{
     );
     this.loadingService.showLoaderUntilComplete(loadCourses$)
       .subscribe();
+  }
+
+  saveCourse(courseid: string, changes: Partial<Course>): Observable<any>{
+    const courses = this.subject.getValue();//gets the last value 
+    const index = courses.findIndex(course=> course.id == courseid);
+
+    const newCourse = {
+      ...courses[index],
+      ...changes
+    };
+
+    const newCourses: Course[] = courses.slice(0);
+    newCourses[index]=newCourse;
+
+    this.subject.next(newCourses);
+    return this.http.put(`/api/courses/${courseid}`,changes)
+            .pipe(
+              catchError(err=> {
+                const msg = "could not save the course";
+                console.log(msg,err);
+                this.messageService.showErrors(msg);
+                return throwError(err);
+              }),
+              shareReplay()
+            );
+  }
+
+  filterByCategory(category: string) : Observable<Course[]>{
+    return this.courses$
+            .pipe(
+              map(courses => 
+                  courses.filter(course => course.category == category)
+                          .sort(sortCoursesBySeqNo)
+                  )
+            )
   }
 
 }
