@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog,MatDialogConfig } from '@angular/material/dialog';
 import { CourseDialogComponent } from 'app/course-dialog/course-dialog.component';
 import { Course } from 'app/model/course';
@@ -7,7 +7,8 @@ import { filter, tap } from 'rxjs/operators';
 @Component({
   selector: 'courses-card-list',
   templateUrl: './courses-card-list.component.html',
-  styleUrls: ['./courses-card-list.component.scss']
+  styleUrls: ['./courses-card-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CoursesCardListComponent implements OnInit {
 
