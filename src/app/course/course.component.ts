@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Course} from '../model/course';
 import {
@@ -25,7 +25,8 @@ interface courseData {
 @Component({
   selector: 'course',
   templateUrl: './course.component.html',
-  styleUrls: ['./course.component.css']
+  styleUrls: ['./course.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CourseComponent implements OnInit {
 
@@ -39,8 +40,14 @@ export class CourseComponent implements OnInit {
 
   ngOnInit() {
     const courseid = parseInt(this.route.snapshot.paramMap.get("courseId"));
-    const course$ = this.courseService.loadCourseById(courseid);
-    const lessons$ = this.courseService.loadAllCourseLessons(courseid);
+    const course$ = this.courseService.loadCourseById(courseid)
+                    .pipe(
+                      startWith(null)
+                    );
+    const lessons$ = this.courseService.loadAllCourseLessons(courseid)
+                    .pipe(
+                      startWith([])
+                    );
 
     this.data$ = combineLatest([course$,lessons$])//emits if either of them are available
         .pipe(

@@ -6,7 +6,7 @@
 
       <img class="course-thumbnail" [src]="data.course?.iconUrl">
 
-      <table class="lessons-table mat-elevation-z7">
+      <table class="lessons-table mat-elevation-z7" *ngIf="data.lessons.length">
 
         <thead>
         <th>#</th>
